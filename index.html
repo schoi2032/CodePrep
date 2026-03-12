@@ -13,8 +13,7 @@
             --editor-bg: #0b0e14;
             --sidebar-bg: #ffffff;
             --accent: #3b82f6;
-            --terminal-bg: #030712;
-            --text-main: #e2e8f0;
+            --terminal-bg: #000000;
         }
 
         body {
@@ -24,74 +23,118 @@
             margin: 0;
             height: 100vh;
             width: 100vw;
-            overflow: hidden; /* Strict fit */
+            overflow: hidden;
+            user-select: none;
         }
         
-        .mono { font-family: 'JetBrains Mono', monospace; }
-        
-        /* View Management */
         .view { 
             display: none; 
-            height: calc(100vh - 64px); /* Subtract Header */
+            height: calc(100vh - 64px); 
             flex-direction: column; 
             overflow: hidden;
         }
         .view.active { display: flex; }
 
-        /* Workspace Grid */
+        /* Resizable Workspace */
         .workspace {
-            display: grid;
-            grid-template-columns: 380px 1fr;
+            display: flex;
             height: 100%;
             overflow: hidden;
             background: #111827;
+            position: relative;
         }
 
         .problem-sidebar {
             background: var(--sidebar-bg);
             color: #1e293b;
-            border-right: 1px solid #e2e8f0;
             overflow-y: auto;
-            padding: 2rem;
+            padding: 2.5rem;
             display: flex;
             flex-direction: column;
+            min-width: 250px;
+            max-width: 700px;
+            width: 400px; /* Initial Width */
+        }
+
+        /* Horizontal Resizer */
+        .resizer-h {
+            width: 6px;
+            cursor: col-resize;
+            background: #1f2937;
+            transition: background 0.2s;
+            z-index: 20;
+        }
+        .resizer-h:hover, .resizer-h.is-dragging {
+            background: var(--accent);
+        }
+
+        /* Vertical Resizer for Bottom Drawer */
+        .resizer-v {
+            height: 4px;
+            cursor: row-resize;
+            background: #1f2937;
+            transition: background 0.2s;
+            z-index: 30;
+            width: 100%;
+        }
+        .resizer-v:hover, .resizer-v.is-dragging {
+            background: var(--accent);
         }
 
         .editor-section {
+            flex: 1;
             display: flex;
             flex-direction: column;
             background: var(--editor-bg);
             position: relative;
             overflow: hidden;
+            min-width: 300px;
         }
 
-        /* Editor Area - Fixed Visibility */
         .custom-textarea {
             width: 100%;
             flex-grow: 1;
             background: var(--editor-bg);
-            color: #ffffff; /* High contrast white for visibility */
+            color: #ffffff;
             font-family: 'JetBrains Mono', monospace;
-            font-size: 16px;
+            font-size: 15px;
             padding: 24px;
             border: none;
             outline: none;
             resize: none;
             line-height: 1.6;
-            caret-color: #3b82f6; /* Blue cursor */
+            caret-color: #3b82f6;
             tab-size: 4;
             white-space: pre;
-            overflow-wrap: normal;
+            overflow: auto;
         }
 
-        /* Terminal Drawer */
+        /* Bottom Drawer with Tabs */
         .bottom-drawer {
-            height: 35%; /* Responsive height */
+            height: 35%; 
+            min-height: 150px;
+            max-height: 80%;
             background: var(--terminal-bg);
-            border-top: 1px solid #1f2937;
             display: flex;
             flex-direction: column;
             flex-shrink: 0;
+            position: relative;
+        }
+
+        .tab-btn {
+            padding: 0 1.5rem;
+            height: 100%;
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #64748b;
+            border-right: 1px solid #1f2937;
+            transition: all 0.2s;
+        }
+        .tab-btn.active {
+            color: white;
+            background: #1f2937;
         }
 
         .terminal-content {
@@ -100,11 +143,19 @@
             font-family: 'JetBrains Mono', monospace;
             font-size: 13px;
             overflow-y: auto;
-            color: #10b981; /* Green text for terminal visibility */
+            color: #10b981; 
             background: #000000;
+            line-height: 1.5;
+            white-space: pre-wrap;
         }
 
-        /* Buttons & Interactions */
+        #html-preview-pane {
+            display: none;
+            flex-grow: 1;
+            background: white;
+        }
+        #html-preview-pane.active { display: block; }
+
         .btn-run {
             background: #1f2937;
             color: #ffffff;
@@ -113,58 +164,35 @@
             font-weight: 700;
             font-size: 0.75rem;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
             transition: all 0.2s;
             border: 1px solid #374151;
         }
-        .btn-run:hover {
-            background: #374151;
-            border-color: #3b82f6;
-        }
+        .btn-run:hover { background: #374151; border-color: #3b82f6; }
 
         .btn-submit {
             background: var(--accent);
             color: white;
-            padding: 0.6rem 2rem;
-            border-radius: 10px;
+            padding: 0.75rem 2rem;
+            border-radius: 12px;
             font-weight: 800;
             transition: all 0.2s;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
         }
         .btn-submit:hover {
             background: #2563eb;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
         }
 
-        #web-preview-overlay {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 400px;
-            height: 300px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-            display: none;
-            flex-direction: column;
-            overflow: hidden;
-            z-index: 50;
-            border: 1px solid #374151;
-        }
-
-        /* Animations */
         @keyframes slideUp {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .animate-enter { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .animate-enter { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
     </style>
 </head>
 <body class="flex flex-col">
 
-    <!-- Navbar -->
     <header class="h-16 bg-[#030712] border-b border-[#1f2937] flex items-center justify-between px-6 shrink-0 z-50">
         <div class="flex items-center gap-3 cursor-pointer" onclick="location.href=location.pathname">
             <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg">
@@ -186,7 +214,7 @@
         <div id="view-landing" class="view active items-center justify-center bg-[#030712]">
             <div class="max-w-4xl w-full px-6 text-center animate-enter">
                 <h1 class="text-6xl font-black text-white mb-6 tracking-tight">Level up your <span class="text-blue-500">hiring.</span></h1>
-                <p class="text-slate-400 text-xl mb-12 max-w-xl mx-auto">Build, deploy, and grade technical assessments in seconds with our high-performance judge.</p>
+                <p class="text-slate-400 text-xl mb-12 max-w-xl mx-auto">Build, deploy, and grade technical assessments in seconds.</p>
                 <div class="grid grid-cols-2 gap-6">
                     <button onclick="showView('create')" class="p-8 bg-white rounded-3xl text-left group hover:bg-blue-50 transition-all">
                         <p class="text-[10px] font-black text-blue-600 uppercase mb-2">Recruiters</p>
@@ -195,7 +223,7 @@
                     <div class="p-8 bg-[#111827] rounded-3xl text-left border border-[#1f2937]">
                         <p class="text-[10px] font-black text-emerald-500 uppercase mb-2">Candidates</p>
                         <div class="flex gap-2">
-                            <input id="join-input" type="text" placeholder="Data String..." class="flex-grow bg-[#030712] border border-[#1f2937] rounded-xl px-4 py-2 text-sm text-white font-mono outline-none focus:ring-1 ring-blue-500">
+                            <input id="join-input" type="text" placeholder="Paste String..." class="flex-grow bg-[#030712] border border-[#1f2937] rounded-xl px-4 py-2 text-sm text-white font-mono outline-none focus:ring-1 ring-blue-500">
                             <button onclick="handleManualJoin()" class="bg-blue-600 px-4 py-2 rounded-xl text-xs font-bold text-white">JOIN</button>
                         </div>
                     </div>
@@ -204,68 +232,46 @@
         </div>
 
         <!-- View: Designer -->
-        <div id="view-create" class="view bg-[#f8fafc] p-8 overflow-hidden">
+        <div id="view-create" class="view bg-[#f1f5f9] p-8 overflow-hidden">
             <div class="max-w-4xl mx-auto w-full h-full flex flex-col">
                 <div class="flex justify-between items-center mb-6 shrink-0">
-                    <h2 class="text-3xl font-black text-slate-900 tracking-tight">Contest Studio</h2>
+                    <h2 class="text-3xl font-black text-slate-900 tracking-tight">Studio</h2>
                     <button onclick="showView('landing')" class="text-slate-400 font-bold text-xs uppercase hover:text-slate-900">Back</button>
                 </div>
                 
                 <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 grid grid-cols-3 gap-6 mb-6 shrink-0">
                     <div class="col-span-2">
-                        <label class="text-[10px] font-black text-slate-400 uppercase mb-2 block">Contest Name</label>
-                        <input id="q-input-title" type="text" placeholder="e.g. Frontend Specialist" class="w-full p-3 bg-slate-50 border-none rounded-xl text-slate-900 font-bold outline-none">
+                        <label class="text-[10px] font-black text-slate-400 uppercase mb-2 block">Name</label>
+                        <input id="q-input-title" type="text" placeholder="Specialist Assessment" class="w-full p-3 bg-slate-100 border border-slate-200 rounded-xl text-slate-900 font-bold outline-none focus:ring-2 ring-blue-500/20">
                     </div>
                     <div>
-                        <label class="text-[10px] font-black text-slate-400 uppercase mb-2 block">Timer (Min)</label>
-                        <input id="q-input-time" type="number" value="30" class="w-full p-3 bg-slate-50 border-none rounded-xl text-slate-900 font-bold outline-none">
+                        <label class="text-[10px] font-black text-slate-400 uppercase mb-2 block">Min</label>
+                        <input id="q-input-time" type="number" value="30" class="w-full p-3 bg-slate-100 border border-slate-200 rounded-xl text-slate-900 font-bold outline-none focus:ring-2 ring-blue-500/20">
                     </div>
                 </div>
 
-                <div id="designer-list" class="flex-grow overflow-y-auto space-y-6 mb-6 pr-2">
-                    <!-- Tasks injected here -->
-                </div>
+                <div id="designer-list" class="flex-grow overflow-y-auto space-y-6 mb-6 pr-2"></div>
                 
                 <div class="flex gap-4 shrink-0">
-                    <button onclick="addTaskUI()" class="flex-grow py-4 border-2 border-dashed border-slate-300 rounded-2xl font-bold text-slate-400 hover:text-blue-500 hover:border-blue-500 transition-all uppercase text-xs">+ Add Challenge</button>
-                    <button onclick="finalizeContest()" class="bg-blue-600 text-white px-10 py-4 rounded-2xl font-black shadow-xl hover:bg-blue-700 transition-all">DEPLOY SYSTEM</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- View: Deployment Success -->
-        <div id="view-lobby" class="view items-center justify-center bg-[#030712]">
-            <div class="max-w-md w-full p-10 bg-white rounded-[2.5rem] shadow-2xl text-center animate-enter">
-                <div class="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner">
-                    <svg class="w-8 h-8 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                </div>
-                <h2 class="text-3xl font-black text-slate-900 mb-2">Ready to Go</h2>
-                <p class="text-slate-500 mb-8 text-sm font-medium">Contest compiled. Copy and share the string.</p>
-                
-                <div id="share-string" class="p-4 bg-slate-50 border border-slate-100 rounded-2xl font-mono text-[9px] break-all text-left text-slate-400 h-24 overflow-y-auto mb-8"></div>
-
-                <div class="space-y-3">
-                    <button id="copy-btn" onclick="copyString()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-black text-sm shadow-lg flex items-center justify-center gap-2 transition-all hover:bg-blue-700">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1"></path></svg>
-                        <span>COPY DATA STRING</span>
-                    </button>
-                    <button onclick="showView('landing')" class="w-full bg-slate-100 text-slate-600 py-4 rounded-xl font-bold text-sm hover:bg-slate-200 transition-all uppercase">Back Home</button>
+                    <button onclick="addTaskUI()" class="flex-grow py-4 border-2 border-dashed border-slate-300 rounded-2xl font-bold text-slate-500 hover:text-blue-500 hover:border-blue-500 transition-all uppercase text-xs">+ Add Challenge</button>
+                    <button onclick="finalizeContest()" class="bg-blue-600 text-white px-10 py-4 rounded-2xl font-black shadow-xl hover:bg-blue-700 transition-all">DEPLOY</button>
                 </div>
             </div>
         </div>
 
         <!-- View: Player IDE -->
         <div id="view-player" class="view">
-            <div class="workspace">
-                <div class="problem-sidebar">
+            <div class="workspace" id="main-workspace">
+                <!-- Sidebar -->
+                <div class="problem-sidebar" id="sidebar">
                     <div class="flex-grow">
-                        <span id="p-count" class="text-[10px] font-black text-blue-500 uppercase bg-blue-50 px-2 py-1 rounded">Problem 1/1</span>
-                        <h1 id="p-title" class="text-2xl font-black text-slate-900 mt-4 mb-4 leading-tight">...</h1>
+                        <span id="p-count" class="text-[10px] font-black text-blue-500 uppercase bg-blue-50 px-2 py-1 rounded">Problem 1</span>
+                        <h1 id="p-title" class="text-2xl font-black text-slate-900 mt-6 mb-6 leading-tight">...</h1>
                         <div id="p-desc" class="text-slate-600 text-sm leading-relaxed whitespace-pre-wrap">...</div>
                     </div>
                     <div class="mt-8 pt-6 border-t border-slate-100 shrink-0">
-                        <label class="text-[9px] font-black text-slate-400 uppercase block mb-2">Language</label>
-                        <select id="p-lang" onchange="changeLang()" class="w-full p-3 border border-slate-200 rounded-xl text-sm font-bold bg-white outline-none focus:ring-1 ring-blue-500 cursor-pointer">
+                        <label class="text-[9px] font-black text-slate-400 uppercase block mb-2">Select Language</label>
+                        <select id="p-lang" onchange="changeLang()" class="w-full p-3 border border-slate-200 rounded-xl text-sm font-bold bg-white outline-none">
                             <option value="javascript">JavaScript</option>
                             <option value="python">Python 3</option>
                             <option value="html">HTML5</option>
@@ -273,50 +279,63 @@
                     </div>
                 </div>
 
+                <!-- Horizontal Resizer Handle -->
+                <div class="resizer-h" id="drag-handle-h"></div>
+
+                <!-- Editor -->
                 <div class="editor-section">
-                    <div class="h-10 bg-[#111827] border-b border-[#1f2937] flex items-center justify-between px-4 shrink-0">
+                    <div class="h-12 bg-[#111827] border-b border-[#1f2937] flex items-center justify-between px-6 shrink-0">
                         <div class="flex items-center gap-3">
-                            <div class="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
-                            <span id="active-lang-label" class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Javascript</span>
+                            <span id="active-lang-label" class="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Javascript</span>
                         </div>
                         <div class="flex items-center gap-3">
                             <button onclick="runCode(false)" class="btn-run">Dry Run</button>
-                            <button onclick="resetTask()" class="text-[9px] font-bold text-slate-500 hover:text-white transition-colors">Reset</button>
+                            <button onclick="resetTask()" class="text-[10px] font-bold text-slate-500 hover:text-white">Reset</button>
                         </div>
                     </div>
 
-                    <!-- IDE TEXTAREA -->
                     <textarea id="main-editor" spellcheck="false" class="custom-textarea"></textarea>
 
-                    <div id="web-preview-overlay">
-                        <div class="h-8 bg-slate-900 flex items-center justify-between px-3">
-                            <span class="text-[9px] font-bold text-slate-500 uppercase">Preview</span>
-                            <button onclick="document.getElementById('web-preview-overlay').style.display='none'" class="text-slate-500 hover:text-white">×</button>
-                        </div>
-                        <iframe id="html-frame" class="flex-grow"></iframe>
-                    </div>
+                    <!-- Console/Output Pane -->
+                    <div class="bottom-drawer" id="bottom-drawer">
+                        <!-- Vertical Resizer Handle -->
+                        <div class="resizer-v" id="drag-handle-v"></div>
 
-                    <div class="bottom-drawer">
-                        <div class="h-8 px-4 bg-[#1f2937]/50 flex items-center justify-between shrink-0">
-                            <span class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Console Output</span>
-                            <div id="exec-status"></div>
+                        <div class="h-10 bg-[#1f2937]/50 flex items-center justify-between shrink-0">
+                            <div class="flex h-full">
+                                <button onclick="setTab('terminal')" id="tab-terminal" class="tab-btn active">Terminal</button>
+                                <button onclick="setTab('output')" id="tab-output" class="tab-btn">Output View</button>
+                            </div>
+                            <div id="exec-status" class="px-6"></div>
                         </div>
+                        
                         <div id="terminal" class="terminal-content"></div>
-                        <div class="h-14 bg-[#030712] border-t border-[#1f2937] flex items-center justify-between px-6 shrink-0">
-                            <span id="runtime-status" class="text-[9px] text-slate-600 font-bold uppercase tracking-widest">Ready</span>
-                            <button onclick="runCode(true)" class="btn-submit">Submit Challenge</button>
+                        <iframe id="html-preview-pane" class="w-full h-full border-none"></iframe>
+
+                        <div class="h-20 bg-[#030712] border-t border-[#1f2937] flex items-center justify-between px-8 shrink-0">
+                            <span id="runtime-status" class="text-[10px] text-slate-500 font-bold uppercase">Ready</span>
+                            <button onclick="runCode(true)" class="btn-submit">SUBMIT CHALLENGE</button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- View: Results -->
+        <!-- Shared Overlay Views -->
+        <div id="view-lobby" class="view items-center justify-center bg-[#030712]">
+            <div class="max-w-md w-full p-10 bg-white rounded-[2.5rem] shadow-2xl text-center">
+                <h2 class="text-3xl font-black text-slate-900 mb-2">Contest Deployed</h2>
+                <div id="share-string" class="p-4 bg-slate-50 border border-slate-100 rounded-2xl font-mono text-[9px] break-all text-left text-slate-400 h-24 overflow-y-auto mb-8 mt-4"></div>
+                <button id="copy-btn" onclick="copyString()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-black text-sm shadow-lg mb-4">COPY STRING</button>
+                <button onclick="showView('landing')" class="w-full bg-slate-100 text-slate-600 py-4 rounded-xl font-bold text-sm">HOME</button>
+            </div>
+        </div>
+
         <div id="view-results" class="view items-center justify-center bg-[#030712]">
             <div class="text-center animate-enter">
-                <p class="text-blue-500 font-black uppercase tracking-[0.4em] text-xs mb-4">Evaluation Complete</p>
-                <h1 class="text-8xl font-black text-white mb-10 tracking-tighter" id="final-ratio">0/0</h1>
-                <button onclick="location.href=location.pathname" class="bg-white text-black px-12 py-4 rounded-full font-black uppercase text-sm hover:scale-105 transition-all">Return Home</button>
+                <p class="text-blue-500 font-black uppercase tracking-[0.4em] text-xs mb-4">Completed</p>
+                <h1 class="text-9xl font-black text-white mb-10 tracking-tighter" id="final-ratio">0/0</h1>
+                <button onclick="location.href=location.pathname" class="bg-white text-black px-12 py-4 rounded-full font-black uppercase text-sm">DONE</button>
             </div>
         </div>
     </main>
@@ -330,27 +349,89 @@
         let timeLeft = 0;
 
         const langTemplates = {
-            javascript: `// Task: Computed logic\n// Result must be stored in 'result' variable\n\nconst a = 10;\nconst b = 5;\nconst result = a + b;\n\nconsole.log("Calculated:", result);`,
-            python: `# Python Mode\n# Result must be stored in 'result' variable\n\na = 10\nb = 5\nresult = a + b\n\nprint(f"Python Output: {result}")`,
-            html: `<!DOCTYPE html>\n<html>\n<body style="background:#0f172a; color:white; font-family:sans-serif; text-align:center; padding:50px;">\n  <h1>Live Preview</h1>\n  <p>Edit code to see changes here.</p>\n</body>\n</html>`
+            javascript: `// Task: Computed logic\n// Result must be stored in 'result' variable\n\nconst a = 10;\nconst b = 5;\nconst result = a + b;\n\nconsole.log("Output:", result);`,
+            python: `# Python 3 Mode\n# Result must be stored in 'result' variable\n\na = 10\nb = 5\nresult = a + b\n\nprint(f"Python Output: {result}")`,
+            html: `<!DOCTYPE html>\n<html>\n<head>\n  <style>\n    body { background: #0f172a; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: sans-serif; }\n    h1 { font-size: 3rem; margin-bottom: 0.5rem; }\n    p { color: #94a3b8; }\n  </style>\n</head>\n<body>\n  <h1>Live Preview</h1>\n  <p>Your HTML renders here instantly.</p>\n</body>\n</html>`
         };
+
+        // Resizable Sidebar Logic (Horizontal)
+        const handleH = document.getElementById('drag-handle-h');
+        const sidebar = document.getElementById('sidebar');
+        let isDraggingH = false;
+
+        handleH.addEventListener('mousedown', (e) => {
+            isDraggingH = true;
+            handleH.classList.add('is-dragging');
+            document.body.style.cursor = 'col-resize';
+        });
+
+        // Resizable Bottom Drawer Logic (Vertical)
+        const handleV = document.getElementById('drag-handle-v');
+        const bottomDrawer = document.getElementById('bottom-drawer');
+        let isDraggingV = false;
+
+        handleV.addEventListener('mousedown', (e) => {
+            isDraggingV = true;
+            handleV.classList.add('is-dragging');
+            document.body.style.cursor = 'row-resize';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (isDraggingH) {
+                const newWidth = e.clientX;
+                if (newWidth > 250 && newWidth < 700) {
+                    sidebar.style.width = newWidth + 'px';
+                }
+            }
+            if (isDraggingV) {
+                const workspaceHeight = document.getElementById('main-workspace').offsetHeight;
+                const newHeight = workspaceHeight - e.clientY + 64; // Adjusting for header
+                if (newHeight > 150 && newHeight < (workspaceHeight * 0.8)) {
+                    bottomDrawer.style.height = newHeight + 'px';
+                }
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDraggingH = false;
+            isDraggingV = false;
+            handleH.classList.remove('is-dragging');
+            handleV.classList.remove('is-dragging');
+            document.body.style.cursor = 'default';
+        });
+
+        function setTab(type) {
+            document.getElementById('tab-terminal').classList.remove('active');
+            document.getElementById('tab-output').classList.remove('active');
+            document.getElementById('terminal').classList.remove('active');
+            document.getElementById('terminal').style.display = 'none';
+            document.getElementById('html-preview-pane').classList.remove('active');
+
+            if (type === 'terminal') {
+                document.getElementById('tab-terminal').classList.add('active');
+                document.getElementById('terminal').style.display = 'block';
+            } else {
+                document.getElementById('tab-output').classList.add('active');
+                document.getElementById('html-preview-pane').classList.add('active');
+            }
+        }
 
         async function initPython() {
             const status = document.getElementById('runtime-status');
-            status.innerText = 'Initializing Engine...';
+            if (pyodide) return;
+            status.innerText = 'LOADING PYTHON...';
             try {
                 pyodide = await loadPyodide();
-                status.innerText = 'Engine: Py3.11 Ready';
-            } catch (e) { status.innerText = 'Engine: Error'; }
+                status.innerText = 'PYTHON 3.11 READY';
+            } catch (e) { status.innerText = 'PYTHON ERROR'; }
         }
 
         function showView(id) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.getElementById('view-' + id).classList.add('active');
-            
             if(id === 'player') {
                 document.getElementById('header-status').classList.remove('hidden');
-                if(!pyodide) initPython();
+                initPython();
             } else {
                 document.getElementById('header-status').classList.add('hidden');
             }
@@ -360,23 +441,23 @@
             const id = contest.tasks.length;
             contest.tasks.push({ title: '', desc: '', judge: 'return result === 15' });
             const div = document.createElement('div');
-            div.className = "p-6 bg-white border border-slate-200 rounded-3xl animate-enter";
+            div.className = "p-6 bg-white border border-slate-200 rounded-3xl animate-enter shadow-sm";
             div.innerHTML = `
                 <div class="flex justify-between items-center mb-4">
-                    <span class="text-[9px] font-black text-slate-400 uppercase">Task #${id+1}</span>
-                    <button onclick="this.parentElement.parentElement.remove()" class="text-red-400 font-bold text-[9px] uppercase">Remove</button>
+                    <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Challenge #${id+1}</span>
+                    <button onclick="this.parentElement.parentElement.remove()" class="text-red-500 font-bold text-[9px] hover:underline">REMOVE</button>
                 </div>
                 <div class="space-y-4">
-                    <input type="text" placeholder="Title" oninput="contest.tasks[${id}].title=this.value" class="w-full p-2 bg-slate-50 rounded-lg font-bold text-sm outline-none">
-                    <textarea placeholder="Description..." oninput="contest.tasks[${id}].desc=this.value" class="w-full p-3 bg-slate-50 rounded-lg text-xs h-24 outline-none"></textarea>
-                    <textarea oninput="contest.tasks[${id}].judge=this.value" class="w-full p-3 bg-[#030712] text-emerald-400 font-mono text-[10px] rounded-lg h-16 border-none outline-none">return result === 15</textarea>
+                    <input type="text" placeholder="Challenge Title" oninput="contest.tasks[${id}].title=this.value" class="w-full p-3 bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-900 text-sm outline-none">
+                    <textarea placeholder="Challenge Description" oninput="contest.tasks[${id}].desc=this.value" class="w-full p-4 bg-slate-100 border border-slate-200 rounded-xl text-slate-700 text-sm h-32 outline-none"></textarea>
+                    <textarea oninput="contest.tasks[${id}].judge=this.value" class="w-full p-3 bg-[#030712] text-emerald-400 font-mono text-[11px] rounded-xl h-20 outline-none">return result === 15</textarea>
                 </div>
             `;
             document.getElementById('designer-list').appendChild(div);
         }
 
         function finalizeContest() {
-            contest.title = document.getElementById('q-input-title').value || "Untiled";
+            contest.title = document.getElementById('q-input-title').value || "Assessment";
             contest.time = parseInt(document.getElementById('q-input-time').value) || 30;
             if(contest.tasks.length === 0) return;
             const data = btoa(unescape(encodeURIComponent(JSON.stringify(contest))));
@@ -392,15 +473,8 @@
             el.select();
             document.execCommand('copy');
             document.body.removeChild(el);
-
-            const btn = document.getElementById('copy-btn');
-            const originalContent = btn.innerHTML;
-            btn.innerHTML = `<span>DONE!</span>`;
-            btn.classList.replace('bg-blue-600', 'bg-emerald-500');
-            setTimeout(() => {
-                btn.innerHTML = originalContent;
-                btn.classList.replace('bg-emerald-500', 'bg-blue-600');
-            }, 2000);
+            document.getElementById('copy-btn').innerText = "COPIED!";
+            setTimeout(() => document.getElementById('copy-btn').innerText = "COPY STRING", 2000);
         }
 
         function handleManualJoin() {
@@ -409,7 +483,7 @@
             try {
                 contest = JSON.parse(decodeURIComponent(escape(atob(str))));
                 startContest();
-            } catch(e) { alert("Invalid contest string."); }
+            } catch(e) { alert("Invalid string."); }
         }
 
         function startContest() {
@@ -417,6 +491,7 @@
             timeLeft = contest.time * 60;
             loadTask();
             showView('player');
+            setTab('terminal');
             if(timer) clearInterval(timer);
             timer = setInterval(() => {
                 timeLeft--;
@@ -431,8 +506,8 @@
             if (!contest.tasks[currentIdx]) return endContest();
             const t = contest.tasks[currentIdx];
             document.getElementById('p-count').innerText = `PROBLEM ${currentIdx+1} / ${contest.tasks.length}`;
-            document.getElementById('p-title').innerText = t.title || "Untitled";
-            document.getElementById('p-desc').innerText = t.desc || "No details provided.";
+            document.getElementById('p-title').innerText = t.title || "Untiled";
+            document.getElementById('p-desc').innerText = t.desc || "Instructions...";
             changeLang();
         }
 
@@ -440,7 +515,7 @@
             const lang = document.getElementById('p-lang').value;
             document.getElementById('active-lang-label').innerText = lang;
             document.getElementById('main-editor').value = langTemplates[lang] || "";
-            document.getElementById('terminal').innerHTML = '<span class="text-slate-600">// Sandbox Ready</span>';
+            document.getElementById('terminal').innerHTML = '<span class="text-slate-600">// Ready</span>';
         }
 
         async function runCode(submit = false) {
@@ -448,7 +523,7 @@
             const lang = document.getElementById('p-lang').value;
             const term = document.getElementById('terminal');
             
-            term.innerHTML = '<span class="text-blue-500 animate-pulse">> Running...</span>';
+            term.innerHTML = '<span class="text-blue-500">> Executing...</span>';
             let output = "";
             let evalResult = null;
             let error = null;
@@ -456,39 +531,40 @@
             try {
                 if(lang === 'javascript') {
                     const originalLog = console.log;
-                    console.log = (...args) => { output += args.join(' ') + '\n'; };
+                    console.log = (...args) => { output += args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ') + '\n'; term.innerText = output; };
                     const runner = new Function(code + `\nreturn (typeof result !== "undefined" ? result : null);`);
                     evalResult = runner();
                     console.log = originalLog;
                 } 
                 else if(lang === 'python') {
-                    pyodide.setStdout({ batched: (s) => output += s + '\n' });
-                    const pyCode = code + `\nimport json\nfrom js import Object\nObject.fromEntries(locals().items())`;
-                    const pyVars = await pyodide.runPythonAsync(pyCode);
-                    evalResult = pyVars.toJs().result;
+                    if (!pyodide) throw new Error("Loading Pyodide...");
+                    pyodide.setStdout({ batched: (s) => { output += s + '\n'; term.innerText = output; } });
+                    await pyodide.runPythonAsync(code);
+                    evalResult = pyodide.globals.get('result');
+                    if (evalResult && evalResult.toJs) evalResult = evalResult.toJs();
                 }
                 else if(lang === 'html') {
-                    document.getElementById('html-frame').srcdoc = code;
-                    document.getElementById('web-preview-overlay').style.display = 'flex';
-                    output = "Visual render triggered.";
+                    document.getElementById('html-preview-pane').srcdoc = code;
+                    setTab('output');
+                    output = "[HTML] Rendered successfully.";
                     evalResult = true; 
                 }
             } catch(e) { error = e.message; }
 
             term.innerText = output || (error ? "" : "Done.");
-            if(error) term.innerHTML += `<br><span class="text-red-500">${error}</span>`;
+            if(error) term.innerHTML += `<br><span class="text-red-500">Error: ${error}</span>`;
 
             if(submit && !error) {
                 try {
                     const judge = new Function('result', contest.tasks[currentIdx].judge);
                     if(judge(evalResult)) {
                         score++;
-                        term.innerHTML += `<br><span class="text-emerald-400 uppercase font-black">Success!</span>`;
-                        setTimeout(() => { currentIdx++; loadTask(); }, 1000);
+                        term.innerHTML += `<br><br><span class="text-emerald-400 font-black">✓ PASSED</span>`;
+                        setTimeout(() => { currentIdx++; loadTask(); }, 1200);
                     } else {
-                        term.innerHTML += `<br><span class="text-amber-400 uppercase font-black">Logic Verification Failed</span>`;
+                        term.innerHTML += `<br><br><span class="text-amber-400 font-black">✗ FAILED</span>`;
                     }
-                } catch(e) { term.innerHTML += `<br><span class="text-red-500">Judge Error: ${e.message}</span>`; }
+                } catch(e) { term.innerHTML += `<br><span class="text-red-500">Judge Error</span>`; }
             }
         }
 
